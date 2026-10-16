@@ -1,0 +1,5 @@
+# Relatórios com dados pessoais/financeiros de servidores (LGPD) — NÃO versionar
+# Este repositório é público: os levantamentos ficam só localmente.
+Levantamento_*.md
+Levantamento_*.csv
+Felixlandia_PC_*.csv
