@@ -5,3 +5,6 @@ Levantamento_*.csv
 Felixlandia_PC_*.csv
 Varredura_*.md
 Varredura_*.csv
+
+# Configuração do rclone contém o token de acesso ao Google Drive — NUNCA versionar
+rclone.conf
