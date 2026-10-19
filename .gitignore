@@ -5,3 +5,8 @@ Levantamento_*.csv
 Felixlandia_PC_*.csv
 Varredura_*.md
 Varredura_*.csv
+
+# Saídas do Caderno de Provas ACS/ACE (contêm relação nominal de servidores — LGPD)
+CADERNO_ACS_ACE_*/
+__pycache__/
+*.pyc
