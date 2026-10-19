@@ -128,10 +128,15 @@ def achado_reclassificacao(quadro):
             "O quantitativo de ACS corresponde, portanto, ao CBO 515105."]}
     texto = []
     primeira = com_tecnico[0]
-    texto.append(
-        f"A partir da competência {primeira['rotulo']} (primeira competência consultada com registro), "
-        f"o CNES passa a registrar profissionais no CBO 322255 (Técnico em Agente Comunitário de Saúde) neste município."
-    )
+    # Só afirma o que foi consultado: a primeira competência CONSULTADA com registro não é,
+    # necessariamente, o mês em que o registro começou (no modo padrão só se consultam setembros).
+    frase = (f"Entre as competências consultadas, a primeira com registro de profissionais no CBO 322255 "
+             f"(Técnico em Agente Comunitário de Saúde) neste município é {primeira['rotulo']}.")
+    anterior = [q for q in com_dado if q["comp"] < primeira["comp"]]
+    if anterior:
+        frase += (f" Na competência consultada imediatamente anterior ({anterior[-1]['rotulo']}), "
+                  f"o CBO 322255 registrava 0.")
+    texto.append(frase)
     linhas = []
     for q in com_tecnico:
         pct = 100.0 * q["cbo322255"] / q["acs_total"] if q["acs_total"] else 0.0

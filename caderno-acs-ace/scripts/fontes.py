@@ -159,6 +159,17 @@ class Evidencias:
 # ---------------------------------------------------------------------------
 # 1. IBGE — resolver o município
 # ---------------------------------------------------------------------------
+def _uf_sigla(m):
+    """Sigla da UF no registro do IBGE (municípios novos podem vir sem microrregião)."""
+    for caminho in (("microrregiao", "mesorregiao", "UF"), ("regiao-imediata", "regiao-intermediaria", "UF")):
+        d = m
+        for chave in caminho:
+            d = (d or {}).get(chave)
+        if d and d.get("sigla"):
+            return d["sigla"]
+    return ""
+
+
 def resolver_municipio(sessao, nome=None, uf=None, ibge=None):
     """
     Devolve dict com nome oficial, UF, códigos IBGE (7 e 6 dígitos), código da UF e da região.
@@ -169,19 +180,26 @@ def resolver_municipio(sessao, nome=None, uf=None, ibge=None):
         cod = re.sub(r"\D", "", str(ibge))
         if len(cod) not in (6, 7):
             raise ValueError("Código IBGE deve ter 6 ou 7 dígitos.")
-        uf_cod = cod[:2]
-        info = {"nome": nome or "", "uf": (uf or "").upper(), "ibge7": cod if len(cod) == 7 else "",
-                "ibge6": cod[:6], "couf": uf_cod, "coregiao": uf_cod[0]}
-        # Tenta completar o nome oficial pelo IBGE (sem travar se a API cair)
-        if len(cod) == 7:
-            try:
-                r = sessao.get(f"https://servicodados.ibge.gov.br/api/v1/localidades/municipios/{cod}", timeout=30)
-                d = r.json()
-                info["nome"] = d["nome"]
-                info["uf"] = d["microrregiao"]["mesorregiao"]["UF"]["sigla"]
-            except Exception:
-                pass
-        return info
+        # Busca o nome oficial e a UF na lista do estado (funciona com 6 ou 7 dígitos)
+        try:
+            r = sessao.get(URL_IBGE_MUNICIPIOS.format(uf=cod[:2]), timeout=(20, 60))
+            r.raise_for_status()
+            achado = next((m for m in r.json() if str(m["id"])[:len(cod)] == cod), None)
+        except Exception as e:
+            achado = None
+            erro_ibge = e
+        else:
+            erro_ibge = "código não consta da lista do IBGE"
+        if achado:
+            c7 = str(achado["id"])
+            return {"nome": achado["nome"], "uf": _uf_sigla(achado) or (uf or "").upper(), "ibge7": c7,
+                    "ibge6": c7[:6], "couf": c7[:2], "coregiao": c7[0]}
+        # Sem confirmação do IBGE: só segue se o usuário informou nome e UF (o caderno precisa identificar o ente)
+        if not (nome and uf):
+            raise ValueError(f"Não foi possível confirmar o código IBGE {cod} ({erro_ibge}). "
+                             "Informe também --municipio e --uf.")
+        return {"nome": nome, "uf": uf.upper(), "ibge7": cod if len(cod) == 7 else "",
+                "ibge6": cod[:6], "couf": cod[:2], "coregiao": cod[0]}
 
     if not (nome and uf):
         raise ValueError("Informe --municipio e --uf, ou --ibge.")

@@ -158,8 +158,9 @@ data/hora (Brasília), bytes e SHA-256. Gerar MANIFESTO_SHA256.txt.
   competência.
 - |diferença| > 2 → caixa "Divergências registradas para investigação", com pontos de
   verificação e sem conclusão.
-- 322255 > 0 em alguma competência → caixa "Achado relevante": primeira competência com
-  registro, maior proporção, quanto o 515105 isolado subestimaria e migração entre CBOs
+- 322255 > 0 em alguma competência → caixa "Achado relevante": primeira competência
+  CONSULTADA com registro (não afirmar que o registro "começou" ali, salvo consulta mês a mês),
+  maior proporção, quanto o 515105 isolado subestimaria e migração entre CBOs
   (515105 cai enquanto 322255 sobe).
 
 ### CONSTRUÇÃO MODULAR (um entregável por vez, conferido)
